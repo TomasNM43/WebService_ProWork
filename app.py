@@ -1,4 +1,4 @@
-import cx_Oracle
+import oracledb
 import sys
 import os
 
@@ -7,7 +7,7 @@ from constants import DB_USER, DB_PASSWORD, DSN, WEB_SERVICE_HOST, WEB_SERVICE_P
 
 # Configuración para MacOS (Wilmar)
 if sys.platform.startswith("darwin"):
-    cx_Oracle.init_oracle_client(lib_dir="/Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru")
+    oracledb.init_oracle_client(lib_dir="/Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru")
 # cd /Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru
 # ./install_ic.sh
 
@@ -16,9 +16,9 @@ if sys.platform.startswith("win"):
     oracle_client_path = r"C:\instantclient_19_29"
     if os.path.exists(oracle_client_path):
         try:
-            cx_Oracle.init_oracle_client(lib_dir=oracle_client_path)
+            oracledb.init_oracle_client(lib_dir=oracle_client_path)
         except Exception as e:
-            # Ya inicializado o en PATH
+            # Ya inicializado o en PATH, o usando thin mode
             pass
 
 app = Flask(__name__)
@@ -27,7 +27,7 @@ def establecerConexion():
     """
     Establece conexión con base de datos
     """
-    conexion = cx_Oracle.connect(user=DB_USER, password=DB_PASSWORD, dsn=DSN, encoding="UTF-8")
+    conexion = oracledb.connect(user=DB_USER, password=DB_PASSWORD, dsn=DSN)
     return conexion
 
 @app.route('/')
