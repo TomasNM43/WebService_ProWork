@@ -1,14 +1,25 @@
 import cx_Oracle
 import sys
+import os
 
 from flask import Flask, jsonify, request
 from constants import DB_USER, DB_PASSWORD, DSN, WEB_SERVICE_HOST, WEB_SERVICE_PORT
 
-# Configruación para MacOS (Wilmar)
+# Configuración para MacOS (Wilmar)
 if sys.platform.startswith("darwin"):
     cx_Oracle.init_oracle_client(lib_dir="/Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru")
 # cd /Volumes/instantclient-basic-macos.x64-19.8.0.0.0dbru
 # ./install_ic.sh
+
+# Configuración para Windows - Oracle Instant Client
+if sys.platform.startswith("win"):
+    oracle_client_path = r"C:\instantclient_19_29"
+    if os.path.exists(oracle_client_path):
+        try:
+            cx_Oracle.init_oracle_client(lib_dir=oracle_client_path)
+        except Exception as e:
+            # Ya inicializado o en PATH
+            pass
 
 app = Flask(__name__)
 
