@@ -1,9 +1,9 @@
 # Configuración de Base de Datos
-DB_USER = "system"
-DB_PASSWORD = "Ginnet$2026"
-DB_HOST = "192.168.18.8"
+DB_USER = "GINNET01"
+DB_PASSWORD = "GINNET2024"
+DB_HOST = "38.253.155.235"
 DB_PORT = "1521"
-DB_SERVICE = "orcl"
+DB_SERVICE = "bdginnet"
 DSN = f"{DB_HOST}:{DB_PORT}/{DB_SERVICE}"
 
 # Configuración del Web Service

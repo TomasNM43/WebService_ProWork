@@ -86,7 +86,7 @@ def validarCredenciales() -> jsonify:
                     asistencia = {'FECHA_HORA_FIN_PRG': row[0]}
             except StopIteration:
                 return jsonify({'mensaje': "No se encontraron datos de asistencia", 'exito': False})
-            
+            print(personal, asistencia)
             if personal and asistencia:
                 return jsonify({'datos': personal, 'asistencia': asistencia, 'mensaje': "Ok", 'exito': True})
             else:
