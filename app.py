@@ -52,12 +52,12 @@ def validarCredenciales() -> jsonify:
     
     try:
         data = request.get_json()
-        if not data.get('ID_PERSONAL') or not data.get('ID_INSTITUCION') or not data.get('PASSWORD'):
+        if not data.get('ID_PERSONAL') or not data.get('ID_EMPRESA') or not data.get('PASSWORD'):
             return jsonify({'mensaje': "Datos incompletos", 'exito': False})
         
         with conexion.cursor() as cursor:
             # Llamar al procedimiento para obtener datos personales
-            cursor.callproc('PRO_WORK.PERSONALMOSTRAR', [data.get('ID_PERSONAL'), data.get('ID_INSTITUCION'), data.get('PASSWORD')])
+            cursor.callproc('PRO_WORK.PERSONALMOSTRAR', [data.get('ID_PERSONAL'), data.get('ID_EMPRESA'), data.get('PASSWORD')])
             result_sets = iter(cursor.getimplicitresults())
             
             try:
@@ -72,7 +72,7 @@ def validarCredenciales() -> jsonify:
                                 'CORREO': row[6],
                                 'TELEFONO': row[7],
                                 'ID_TIPO_TRABAJADOR': row[8],
-                                'ID_INSTITUCION': row[9]}
+                                'ID_EMPRESA': row[9]}
             except StopIteration:
                 return jsonify({'mensaje': "No se encontraron datos personales", 'exito': False})
             
@@ -83,7 +83,7 @@ def validarCredenciales() -> jsonify:
             try:
                 asistencia_result = next(result_sets)
                 for row in asistencia_result:
-                    asistencia = {'FECHA_HORA_FIN_PRG': row[0]}
+                    asistencia = {'FECHA_HORA_FIN_REAL': row[0]}
             except StopIteration:
                 return jsonify({'mensaje': "No se encontraron datos de asistencia", 'exito': False})
             print(personal, asistencia)
@@ -94,8 +94,8 @@ def validarCredenciales() -> jsonify:
     except Exception as e:
         return jsonify({'mensaje': "Error en el procedimiento: " + str(e), 'exito': False})
 
-@app.route('/parametros/<ID_INSTITUCION>', methods=['GET'])
-def listarParametrosPorInstitucion(ID_INSTITUCION: str) -> jsonify:
+@app.route('/parametros/<ID_EMPRESA>', methods=['GET'])
+def listarParametrosPorInstitucion(ID_EMPRESA: str) -> jsonify:
     """
     Listar tabla Parametros
     """
@@ -106,7 +106,7 @@ def listarParametrosPorInstitucion(ID_INSTITUCION: str) -> jsonify:
     parametros = None
     try:
         with conexion.cursor() as cursor:
-            cursor.callproc('PRO_WORK.INSTITUCION_PARAMETROMOSTRAR', [ID_INSTITUCION])
+            cursor.callproc('PRO_WORK.INSTITUCION_PARAMETROMOSTRAR', [ID_EMPRESA])
             for results in cursor.getimplicitresults():
                 for row in results:
                     print(row)
@@ -188,8 +188,8 @@ def actualizarAsistenciaFinaliza(ID_PERSONAL: str) -> jsonify:
     except Exception:
         return jsonify({'mensaje': "Error finalizando jornada", 'exito': False})
 
-@app.route('/justifica/<ID_INSTITUCION>', methods=['GET'])
-def listarJustifica(ID_INSTITUCION: str) -> jsonify:
+@app.route('/justifica/<ID_EMPRESA>', methods=['GET'])
+def listarJustifica(ID_EMPRESA: str) -> jsonify:
     """
     Listar tabla Tipo_Justifica
     """
@@ -201,7 +201,7 @@ def listarJustifica(ID_INSTITUCION: str) -> jsonify:
     temp = None
     try:
         with conexion.cursor() as cursor:
-            cursor.callproc('PRO_WORK.PERSONA_JUSTIFICACIONMOSTRAR', [ID_INSTITUCION])
+            cursor.callproc('PRO_WORK.PERSONA_JUSTIFICACIONMOSTRAR', [ID_EMPRESA])
             for results in enumerate(cursor.getimplicitresults()):
                 for row in results[1]:
                     temp = {'ID_JUSTIFICACION': row[0],
@@ -282,8 +282,8 @@ def actualizarRefrigerioFinaliza(ID_PERSONAL: str) -> jsonify:
     except Exception:
         return jsonify({'mensaje': "No existe refrigerio para finalizar", 'exito': False})
 
-@app.route('/actividades/<ID_PERSONAL>', methods=['GET'])
-def listarActividades(ID_PERSONAL: str) -> jsonify:
+@app.route('/actividades/<ID_PERSONAL>/<ID_EMPRESA>', methods=['GET'])
+def listarActividades(ID_PERSONAL: str, ID_EMPRESA: str) -> jsonify:
     """
     Listar actividades
     """
@@ -295,7 +295,7 @@ def listarActividades(ID_PERSONAL: str) -> jsonify:
     temp = None
     try:
         with conexion.cursor() as cursor:
-            cursor.callproc('PRO_WORK.PERSONAL_ACTIVIDADMOSTRAR', [ID_PERSONAL])
+            cursor.callproc('PRO_WORK.PERSONAL_ACTIVIDADMOSTRAR', [ID_PERSONAL, ID_EMPRESA])
             for results in enumerate(cursor.getimplicitresults()):
                 for row in results[1]:
                     temp = {'TITULO_ACTIVIDAD': row[0],
