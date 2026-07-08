@@ -295,17 +295,39 @@ def listarActividades(ID_PERSONAL: str, ID_EMPRESA: str) -> jsonify:
     temp = None
     try:
         with conexion.cursor() as cursor:
-            cursor.callproc('PRO_WORK.PERSONAL_ACTIVIDADMOSTRAR', [ID_PERSONAL, ID_EMPRESA])
+            cursor.callproc('PRO_WORK.PERSONAL_ACTIVIDADMOSTRAR_WEB', [ID_PERSONAL, ID_EMPRESA])
             for results in enumerate(cursor.getimplicitresults()):
                 for row in results[1]:
-                    temp = {'TITULO_ACTIVIDAD': row[0],
-                            'DESCRIPCION_ACTIVIDAD': row[1],
-                            'ESTADO_ACTIVIDAD': row[2],
-                            'AVANCE_ACTIVIDAD': row[3]}
+                    temp = {'ID_ACTIVIDAD': row[0],
+                            'TITULO_ACTIVIDAD': row[1],
+                            'TIPO_ACTIVIDAD': row[2],
+                            'DESCRIPCION_ACTIVIDAD': row[3],
+                            'ESTADO_ACTIVIDAD': row[4],
+                            'AVANCE_ACTIVIDAD': row[5]}
                     actividades.append(temp)
             return jsonify({'datos': actividades, 'mensaje': "Ok", 'exito': True})
     except Exception:
         return jsonify({'mensaje': "Error al recopilar datos", 'exito': False})
+
+@app.route('/actividades/diaria/completar/<ID_ACTIVIDAD>', methods=['PUT'])
+def completarActividadDiaria(ID_ACTIVIDAD: str) -> jsonify:
+    """
+    Marca la actividad diaria de hoy como completada al 100%
+    """
+    try:
+        conexion = establecerConexion()
+    except Exception as e:
+        return jsonify({'error': str(e), 'mensaje': "Error conectando a la base de datos", 'exito': False})
+    try:
+        with conexion.cursor() as cursor:
+            cursor.callproc('PRO_WORK.ACTIVIDADDIARIA_COMPLETAR', [ID_ACTIVIDAD])
+            conexion.commit()
+            return jsonify({'mensaje': "Ok", 'exito': True})
+    except Exception as e:
+        return jsonify({'mensaje': "Error al completar actividad diaria", 'exito': False, 'error': str(e)})
+    finally:
+        if conexion:
+            conexion.close()
 
 if __name__ == '__main__':
     # Para desarrollo local
