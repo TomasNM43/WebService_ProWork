@@ -231,6 +231,30 @@ def grabarEvento() -> jsonify:
         print(e)
         return jsonify({'mensaje': "Error al grabar evento", 'exito': False})
 
+@app.route('/minutos/improductivos/<ID_PERSONAL>/<FECHA_HORA_INICIO_PRG>', methods=['GET'])
+def listarMinutosImproductivos(ID_PERSONAL: str, FECHA_HORA_INICIO_PRG: str):
+    try:
+        conexion = establecerConexion()
+    except Exception as e:
+        return jsonify({'error': str(e), 'mensaje': "Error conectando a la base de datos", 'exito': False})
+    
+    minutos = None
+    try:
+        with conexion.cursor() as cursor:
+            cursor.callproc('PRO_WORK.PERSONAL_MINUTOSIMPRODUCTIVOSMOSTRAR', [ID_PERSONAL, FECHA_HORA_INICIO_PRG])
+            for results in cursor.getimplicitresults():
+                for row in results:
+                    minutos = {'MINUTOS_IMPRODUCTIVOS': row[0]}
+        
+        if minutos:
+            return jsonify({'datos': minutos, 'mensaje': "Ok", 'exito': True})
+        else:
+            return jsonify({'mensaje': "No se encontraron datos de minutos improductivos", 'exito': False})
+
+    except Exception as e:
+        return jsonify({'mensaje': "Error al recopilar datos", 'error': str(e), 'exito': False}) # ✅ muestra el error real
+    
+
 @app.route('/minutos/improductivos/<ID_PERSONAL>/<VALOR>', methods=['PUT'])
 def actualizarMinutosImproductivos(ID_PERSONAL:str, VALOR: int) -> jsonify:
     """
